@@ -122,4 +122,19 @@ Biome's linter will catch most issues automatically. Focus your attention on:
 
 Most formatting and common issues are automatically fixed by Biome. Run `pnpm dlx ultracite fix` before committing to ensure compliance.
 
+## Cloud Agent
+
+This repo requires Node.js `>=24`. The Cloud Agent image keeps Node 24 at `/usr/local/lib/nodejs/bin`. Put that directory first on `PATH` before `pnpm`, `vite`, or `wrangler`. An older Node binary is also on `PATH` and will not satisfy `engines`.
+
+The environment starts these local processes on boot:
+
+- Control plane (`wrangler dev`): `http://127.0.0.1:8787`
+- Dashboard: `http://127.0.0.1:5173`
+- Landing: `http://127.0.0.1:5174`
+- Docs: `http://127.0.0.1:3000`
+
+`packages/control-plane/.dev.vars` is created from `.dev.vars.example` when it is missing. An empty `JWT_SECRET` is filled with the local value `local-dev-jwt-secret`, and an empty `ALLOWED_ORIGINS` is filled with `http://127.0.0.1:5173,http://localhost:5173` so the dashboard can call the worker. Mint a dashboard token with `pnpm dev:token`. Model, GitHub, Devin, and Modal keys in that file are optional for health checks, session lists, and benchmark task lists.
+
+`pnpm install` runs `lefthook install`. Cloud agents set `core.hooksPath`, and lefthook exits if that value is present. The environment install unsets it only for the install, then restores it. Do not leave `core.hooksPath` unset.
+
 
