@@ -122,6 +122,7 @@ Biome's linter will catch most issues automatically. Focus your attention on:
 
 Most formatting and common issues are automatically fixed by Biome. Run `pnpm dlx ultracite fix` before committing to ensure compliance.
 
+<<<<<<< HEAD
 ## Cloud Agent
 
 This repo requires Node.js `>=24`. The Cloud Agent image keeps Node 24 at `/usr/local/lib/nodejs/bin`. Put that directory first on `PATH` before `pnpm`, `vite`, or `wrangler`. An older Node binary is also on `PATH` and will not satisfy `engines`.
@@ -136,5 +137,29 @@ The environment starts these local processes on boot:
 `packages/control-plane/.dev.vars` is created from `.dev.vars.example` when it is missing. An empty `JWT_SECRET` is filled with the local value `local-dev-jwt-secret`, and an empty `ALLOWED_ORIGINS` is filled with `http://127.0.0.1:5173,http://localhost:5173` so the dashboard can call the worker. Mint a dashboard token with `pnpm dev:token`. Model, GitHub, Devin, and Modal keys in that file are optional for health checks, session lists, and benchmark task lists.
 
 `pnpm install` runs `lefthook install`. Cloud agents set `core.hooksPath`, and lefthook exits if that value is present. The environment install unsets it only for the install, then restores it. Do not leave `core.hooksPath` unset.
+=======
+## Local development
+
+The repo requires Node.js 24 (`engines.node`) and pnpm 10.33.4. pnpm 10 skips dependency build scripts unless they are approved; set `dangerously-allow-all-builds` so `esbuild` and `workerd` can install:
+
+```bash
+pnpm config set --global dangerously-allow-all-builds true
+pnpm install --frozen-lockfile
+```
+
+`pnpm install` runs `lefthook install`. If `core.hooksPath` points at the agent hook directory, unset that local git config for the install and restore it afterward.
+
+Copy `packages/control-plane/.dev.vars.example` to `packages/control-plane/.dev.vars` and set `JWT_SECRET`. Set `ALLOWED_ORIGINS` to `http://localhost:5173` so the dashboard can call the worker. Apply the local D1 schema with `pnpm db:apply:local`, then mint a dashboard token with `pnpm dev:token`.
+
+| Process | Command | Port |
+| --- | --- | --- |
+| Control plane | `pnpm dev:worker` | 8787 |
+| Dashboard | `pnpm dev:dashboard` | 5173 |
+| Landing | `pnpm dev:landing` | 5174 |
+| Docs | `pnpm dev:docs` | 3000 |
+| Docker shim | `pnpm dev:docker-shim` | 8000 |
+
+The docker shim needs a running Docker daemon and `SHIM_SECRET` equal to `MODAL_SHIM_SECRET` in `.dev.vars`. Point `MODAL_SHIM_URL` at `http://127.0.0.1:8000`. `pnpm dev:modal` needs a Modal account and is not part of the default local stack. Model, GitHub, and Devin keys in `.dev.vars` are only required for live agent runs.
+>>>>>>> origin/main
 
 
