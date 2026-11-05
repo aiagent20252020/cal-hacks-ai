@@ -122,4 +122,27 @@ Biome's linter will catch most issues automatically. Focus your attention on:
 
 Most formatting and common issues are automatically fixed by Biome. Run `pnpm dlx ultracite fix` before committing to ensure compliance.
 
+## Local development
+
+The repo requires Node.js 24 (`engines.node`) and pnpm 10.33.4. pnpm 10 skips dependency build scripts unless they are approved; set `dangerously-allow-all-builds` so `esbuild` and `workerd` can install:
+
+```bash
+pnpm config set --global dangerously-allow-all-builds true
+pnpm install --frozen-lockfile
+```
+
+`pnpm install` runs `lefthook install`. If `core.hooksPath` points at the agent hook directory, unset that local git config for the install and restore it afterward.
+
+Copy `packages/control-plane/.dev.vars.example` to `packages/control-plane/.dev.vars` and set `JWT_SECRET`. Set `ALLOWED_ORIGINS` to `http://localhost:5173` so the dashboard can call the worker. Apply the local D1 schema with `pnpm db:apply:local`, then mint a dashboard token with `pnpm dev:token`.
+
+| Process | Command | Port |
+| --- | --- | --- |
+| Control plane | `pnpm dev:worker` | 8787 |
+| Dashboard | `pnpm dev:dashboard` | 5173 |
+| Landing | `pnpm dev:landing` | 5174 |
+| Docs | `pnpm dev:docs` | 3000 |
+| Docker shim | `pnpm dev:docker-shim` | 8000 |
+
+The docker shim needs a running Docker daemon and `SHIM_SECRET` equal to `MODAL_SHIM_SECRET` in `.dev.vars`. Point `MODAL_SHIM_URL` at `http://127.0.0.1:8000`. `pnpm dev:modal` needs a Modal account and is not part of the default local stack. Model, GitHub, and Devin keys in `.dev.vars` are only required for live agent runs.
+
 
