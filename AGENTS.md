@@ -124,16 +124,16 @@ Most formatting and common issues are automatically fixed by Biome. Run `pnpm dl
 
 ## Local development
 
-The repo requires Node.js 24 (`engines.node`) and pnpm 10.33.4. pnpm 10 skips dependency build scripts unless they are approved; set `dangerously-allow-all-builds` so `esbuild` and `workerd` can install:
+The repo requires Node.js 24 (`engines.node`) and pnpm 10.33.4. In Cloud Agent, Node 24 is available at `/usr/local/lib/nodejs/bin`; put that directory first on `PATH` before `pnpm`, `vite`, or `wrangler` so `engines` checks pass. pnpm 10 skips dependency build scripts unless they are approved; set `dangerously-allow-all-builds` so `esbuild` and `workerd` can install:
 
 ```bash
 pnpm config set --global dangerously-allow-all-builds true
 pnpm install --frozen-lockfile
 ```
 
-`pnpm install` runs `lefthook install`. If `core.hooksPath` points at the agent hook directory, unset that local git config for the install and restore it afterward.
+`pnpm install` runs `lefthook install`. If `core.hooksPath` points at the agent hook directory, unset that local git config for the install and restore it afterward. Cloud Agent installs temporarily unset `core.hooksPath` for this reason and then restore it.
 
-Copy `packages/control-plane/.dev.vars.example` to `packages/control-plane/.dev.vars` and set `JWT_SECRET`. Set `ALLOWED_ORIGINS` to `http://localhost:5173` so the dashboard can call the worker. Apply the local D1 schema with `pnpm db:apply:local`, then mint a dashboard token with `pnpm dev:token`.
+`packages/control-plane/.dev.vars` is created from `.dev.vars.example` when it is missing. If `JWT_SECRET` is empty, set it (Cloud Agent uses `local-dev-jwt-secret` locally). Set `ALLOWED_ORIGINS` so the dashboard can call the worker (`http://127.0.0.1:5173,http://localhost:5173` for Cloud Agent local runs). Apply the local D1 schema with `pnpm db:apply:local`, then mint a dashboard token with `pnpm dev:token`.
 
 | Process | Command | Port |
 | --- | --- | --- |
@@ -144,5 +144,4 @@ Copy `packages/control-plane/.dev.vars.example` to `packages/control-plane/.dev.
 | Docker shim | `pnpm dev:docker-shim` | 8000 |
 
 The docker shim needs a running Docker daemon and `SHIM_SECRET` equal to `MODAL_SHIM_SECRET` in `.dev.vars`. Point `MODAL_SHIM_URL` at `http://127.0.0.1:8000`. `pnpm dev:modal` needs a Modal account and is not part of the default local stack. Model, GitHub, and Devin keys in `.dev.vars` are only required for live agent runs.
-
 
